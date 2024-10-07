@@ -1,3 +1,10 @@
+/* Código adaptado de https://github.com/fellowsheep/CG2024-2/tree/6a149c7a3ac80d20722317d1084002780cfe750c/Hello3D-VS2022
+ *
+ * Adaptado por Clara Burghardt
+ * para a disciplina de Processamento Gráfico - Unisinos
+ * 
+ */
+
 #include <iostream>
 #include <string>
 #include <assert.h>
@@ -13,7 +20,7 @@
 
 using namespace std;
 
-// Variáveis globais para a câmera
+// Variáveis globais da câmera
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -46,15 +53,14 @@ struct Object {
 Object obj1, obj2, obj3;
 int selectedObject = 1;
 
-// Declara as funções
+// Protótipos das funções
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 int loadSimpleOBJ(string filePATH, int& nVertices);
 void applyTransformations(Object& obj);
 
-int main()
-{
+int main() {
     // Inicialização do GLFW
     glfwInit();
 
@@ -69,23 +75,22 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Inicializa o GLAD
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
     }
 
-    // Informações do renderizador e versão do OpenGL
+    // Obtem informações do renderizador e versão do OpenGL
     const GLubyte* renderer = glGetString(GL_RENDERER);
     const GLubyte* version = glGetString(GL_VERSION);
     cout << "Renderer: " << renderer << endl;
     cout << "OpenGL version supported " << version << endl;
 
-    // Configuração da viewport
+    // Configura a viewport com as mesmas dimensões da janela
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    // Carrega os shaders
+    // Compila e builda o programa de shader
     Shader shader("C:\\Users\\I555002\\OneDrive - SAP SE\\Desktop\\CG2024-2\\TrabalhoGA\\phong.vs", "C:\\Users\\I555002\\OneDrive - SAP SE\\Desktop\\CG2024-2\\TrabalhoGA\\phong.fs");
     glUseProgram(shader.ID);
 
@@ -108,23 +113,24 @@ int main()
     // Habilita o teste de profundidade
     glEnable(GL_DEPTH_TEST);
 
-    // Configurações de iluminação
+    // Configura propriedades da superfície
     shader.setFloat("ka", 0.2);
     shader.setFloat("ks", 0.5);
     shader.setFloat("kd", 0.5);
     shader.setFloat("q", 10.0);
+
+    // Configura propriedades da fonte de luz
     shader.setVec3("lightPos", -2.0, 10.0, 3.0);
     shader.setVec3("lightColor", 1.0, 1.0, 1.0);
 
-    // Escala inicial dos objetos
+    // Configura escala inicial dos objetos
     obj1.scale = 1.0f;
     obj2.scale = 1.0f;
     obj3.scale = 1.0f;
 
     // Loop principal da aplicação
-    while (!glfwWindowShouldClose(window))
-    {
-        // Verifica eventos (teclado, mouse, etc.)
+    while (!glfwWindowShouldClose(window)) {
+        // Verifica eventos de input (teclado, mouse, etc.)
         glfwPollEvents();
 
         // Limpa o buffer de cor e profundidade
@@ -172,11 +178,9 @@ int main()
     return 0; // Finaliza o programa
 }
 
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     // Verifica se é a primeira vez que o mouse é movido
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = xpos; // Armazena a posição inicial do mouse em X
         lastY = ypos; // Armazena a posição inicial do mouse em Y
         firstMouse = false; // Atualiza a variável para não entrar mais aqui
@@ -212,14 +216,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     cameraFront = glm::normalize(front);
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     // Ajusta a posição da câmera com base na rolagem do mouse
     cameraPos += cameraFront * (float)yoffset * zoomSpeed;
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     // Fecha a janela se a tecla ESC for pressionada
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
@@ -236,62 +238,45 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     Object* currentObj = (selectedObject == 1) ? &obj1 : (selectedObject == 2) ? &obj2 : &obj3;
 
     // Controle de rotação do objeto em X, Y e Z
-    if (key == GLFW_KEY_X && action == GLFW_PRESS)
-    {
+    if (key == GLFW_KEY_X && action == GLFW_PRESS)    
         currentObj->rotationX += glm::radians(15.0f);
-    }
 
     if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-    {
         currentObj->rotationY += glm::radians(15.0f);
-    }
 
     if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-    {
         currentObj->rotationZ += glm::radians(15.0f);
-    }
 
     // Controle de translação do objeto em X, Y e Z
     float translationSpeed = 0.1f;
     if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para cima
-    {
         currentObj->translation.y += translationSpeed;
-    }
+    
     if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para baixo
-    {
         currentObj->translation.y -= translationSpeed;
-    }
+    
     if (key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para a esquerda
-    {
         currentObj->translation.x -= translationSpeed;
-    }
+    
     if (key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para a direita
-    {
         currentObj->translation.x += translationSpeed;
-    }
+    
     if (key == GLFW_KEY_K && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para frente
-    {
         currentObj->translation.z -= translationSpeed;
-    }
+    
     if (key == GLFW_KEY_L && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Move para trás
-    {
         currentObj->translation.z += translationSpeed;
-    }
 
     // Controle de escala
     float scaleSpeed = 0.1f;
     if (key == GLFW_KEY_KP_ADD && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Aumenta escala
-    {
         currentObj->scale += scaleSpeed;
-    }
+    
     if (key == GLFW_KEY_KP_SUBTRACT && (action == GLFW_PRESS || action == GLFW_REPEAT)) // Diminui escala
-    {
         currentObj->scale -= scaleSpeed;
-    }
 }
 
-void applyTransformations(Object& obj)
-{
+void applyTransformations(Object& obj) {
     // Inicializa a matriz do modelo como a matriz identidade
     obj.model = glm::mat4(1.0f);
 
@@ -307,8 +292,7 @@ void applyTransformations(Object& obj)
     obj.model = glm::scale(obj.model, glm::vec3(obj.scale, obj.scale, obj.scale));
 }
 
-int loadSimpleOBJ(string filePath, int& nVertices)
-{
+int loadSimpleOBJ(string filePath, int& nVertices) {
     // Vetores para armazenar os dados do objeto
     vector <glm::vec3> vertices;
     vector <glm::vec2> texCoords;
@@ -322,70 +306,71 @@ int loadSimpleOBJ(string filePath, int& nVertices)
     ifstream arqEntrada;
 
     arqEntrada.open(filePath.c_str());
-    if (arqEntrada.is_open())
-    {
+    if (arqEntrada.is_open()) {
+        // Faz o parsing
         string line;
         // Lê o arquivo linha por linha
-        while (!arqEntrada.eof())
-        {
+        while (!arqEntrada.eof()) {
             getline(arqEntrada, line);
             istringstream ssline(line);
             string word;
             ssline >> word;
 
             // Processa os vértices
-            if (word == "v")
-            {
+            if (word == "v") {
                 glm::vec3 vertice;
                 ssline >> vertice.x >> vertice.y >> vertice.z;
                 vertices.push_back(vertice);
             }
 
             // Processa as coordenadas de textura
-            if (word == "vt")
-            {
+            if (word == "vt") {
                 glm::vec2 vt;
                 ssline >> vt.s >> vt.t;
                 texCoords.push_back(vt);
             }
 
             // Processa as normais
-            if (word == "vn")
-            {
+            if (word == "vn") {
                 glm::vec3 normal;
                 ssline >> normal.x >> normal.y >> normal.z;
                 normals.push_back(normal);
             }
 
             // Processa as faces
-            else if (word == "f")
-            {
-                while (ssline >> word)
-                {
+            else if (word == "f") {
+                while (ssline >> word) {
                     int vi, ti, ni;
                     istringstream ss(word);
                     std::string index;
 
+                    // Pega o índice do vértice
                     std::getline(ss, index, '/');
                     vi = std::stoi(index) - 1;
 
+                    // Pega o índice da coordenada de textura
                     std::getline(ss, index, '/');
                     ti = std::stoi(index) - 1;
 
+                    // Pega o índice da normal
                     std::getline(ss, index);
                     ni = std::stoi(index) - 1;
 
+                    //Recupera os vértices do indice lido
                     vBuffer.push_back(vertices[vi].x);
                     vBuffer.push_back(vertices[vi].y);
                     vBuffer.push_back(vertices[vi].z);
 
+                    //Atributo cor
                     vBuffer.push_back(color.r);
                     vBuffer.push_back(color.g);
                     vBuffer.push_back(color.b);
 
+                    //Atributo coordenada de textura
                     vBuffer.push_back(texCoords[ti].s);
                     vBuffer.push_back(texCoords[ti].t);
 
+                    //Atributo vetor normal
                     vBuffer.push_back(normals[ni].x);
                     vBuffer.push_back(normals[ni].y);
                     vBuffer.push_back(normals[ni].z);
@@ -399,16 +384,16 @@ int loadSimpleOBJ(string filePath, int& nVertices)
         cout << "Gerando o buffer de geometria..." << endl;
         GLuint VBO, VAO;
 
-        // Gera o buffer de vértices
+        // Gera o identificador do VBO
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vBuffer.size() * sizeof(GLfloat), vBuffer.data(), GL_STATIC_DRAW);
 
-        // Gera o Vertex Array Object (VAO)
+        // Gera o identificador do VAO
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
 
-        // Configura os atributos de vértices
+        // Configura os atributos (posição, cor, coordenada de textura, vetor normal) de vértices 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
@@ -418,16 +403,15 @@ int loadSimpleOBJ(string filePath, int& nVertices)
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
         glEnableVertexAttribArray(3);
 
-        // Desativa o buffer e o VAO após configuração
+        // Desvincula o buffer e o VAO após configuração
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
         nVertices = vBuffer.size() / 2;
         return VAO;
     }
-    else
-    {
-        // Erro ao abrir o arquivo
+    else {
+        // Apresenta erro ao abrir o arquivo
         cout << "Erro ao tentar ler o arquivo " << filePath << endl;
         return -1;
     }
